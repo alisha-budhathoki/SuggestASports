@@ -1,15 +1,11 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
-const SplashScreen = () => {
-  const navigation = useNavigation();
-
+const SplashScreen = ({ navigation }) => {
   useEffect(() => {
-    // Navigate to Home after 3 seconds
     const timer = setTimeout(() => {
-      navigation.replace('Home');
-    }, 3000);
+      navigation.replace('Main');
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [navigation]);
@@ -17,11 +13,11 @@ const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/logoSports.png')}
+        source={require('../assets/splash-icon.png')}
         style={styles.logo}
         resizeMode="contain"
       />
-      <Text style={styles.title}>SuggestSport</Text>
+      <Text style={styles.title}>SuggestaSport</Text>
       <Text style={styles.subtitle}>Find Your Perfect Sport</Text>
     </View>
   );
@@ -30,7 +26,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -40,15 +36,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#4CAF50',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: '#FFFFFF',
-    opacity: 0.8,
+    color: '#666',
   },
 });
 

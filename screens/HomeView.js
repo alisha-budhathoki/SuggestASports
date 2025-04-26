@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, SafeAreaView, StatusBar, Platform } from 'react-native';
 
 const HomeView = () => {
   const sportsNews = [
@@ -24,28 +24,35 @@ const HomeView = () => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#4CAF50" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Sports News & Ideas</Text>
       </View>
-
-      {sportsNews.map((news) => (
-        <View key={news.id} style={styles.newsCard}>
-          <Image source={news.image} style={styles.newsImage} />
-          <View style={styles.newsContent}>
-            <Text style={styles.newsTitle}>{news.title}</Text>
-            <Text style={styles.newsDescription}>{news.description}</Text>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {sportsNews.map((news) => (
+          <View key={news.id} style={styles.newsCard}>
+            <Image source={news.image} style={styles.newsImage} />
+            <View style={styles.newsContent}>
+              <Text style={styles.newsTitle}>{news.title}</Text>
+              <Text style={styles.newsDescription}>{news.description}</Text>
+            </View>
           </View>
-        </View>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     padding: 20,
@@ -56,9 +63,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    padding: 10,
+  },
   newsCard: {
     backgroundColor: '#FFFFFF',
-    margin: 10,
+    marginBottom: 15,
     borderRadius: 10,
     overflow: 'hidden',
     elevation: 3,

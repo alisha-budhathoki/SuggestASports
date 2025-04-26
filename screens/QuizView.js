@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, Platform } from 'react-native';
 
 const QuizView = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -45,32 +45,42 @@ const QuizView = () => {
 
   if (showScore) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.scoreText}>Your Score: {score}/{questions.length}</Text>
-        <TouchableOpacity style={styles.button} onPress={restartQuiz}>
-          <Text style={styles.buttonText}>Restart Quiz</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+        <View style={styles.scoreContainer}>
+          <Text style={styles.scoreText}>Your Score: {score}/{questions.length}</Text>
+          <TouchableOpacity style={styles.button} onPress={restartQuiz}>
+            <Text style={styles.buttonText}>Restart Quiz</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>
-          {questions[currentQuestion].question}
-        </Text>
-        {questions[currentQuestion].options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.optionButton}
-            onPress={() => handleAnswer(index)}
-          >
-            <Text style={styles.optionText}>{option}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionText}>
+            {questions[currentQuestion].question}
+          </Text>
+          {questions[currentQuestion].options.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.optionButton}
+              onPress={() => handleAnswer(index)}
+            >
+              <Text style={styles.optionText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -78,6 +88,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
     padding: 20,
   },
   questionContainer: {
@@ -107,6 +123,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+  scoreContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   scoreText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -118,6 +140,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginTop: 20,
+    width: '80%',
   },
   buttonText: {
     color: '#FFFFFF',

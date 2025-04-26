@@ -1,11 +1,58 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  Keyboard,
+  StatusBar
+} from 'react-native';
 
 const ChatBotView = () => {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([
     { id: 1, text: 'Hello! I\'m your sports assistant. How can I help you today?', isBot: true }
   ]);
+  const scrollViewRef = useRef();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const keyboardWillShow = Platform.OS === 'ios'
+      ? Keyboard.addListener('keyboardWillShow', (e) => {
+          setKeyboardHeight(e.endCoordinates.height);
+        })
+      : Keyboard.addListener('keyboardDidShow', (e) => {
+          setKeyboardHeight(e.endCoordinates.height);
+        });
+
+    const keyboardWillHide = Platform.OS === 'ios'
+      ? Keyboard.addListener('keyboardWillHide', () => {
+          setKeyboardHeight(0);
+        })
+      : Keyboard.addListener('keyboardDidHide', () => {
+          setKeyboardHeight(0);
+        });
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  const scrollToBottom = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
 
   const handleSend = () => {
     if (message.trim() === '') return;
@@ -20,6 +67,7 @@ const ChatBotView = () => {
     }, 1000);
 
     setMessage('');
+    Keyboard.dismiss();
   };
 
   const getBotResponse = (userMessage) => {
@@ -37,37 +85,56 @@ const ChatBotView = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView style={styles.chatContainer}>
-        {chatHistory.map((msg) => (
-          <View
-            key={msg.id}
-            style={[
-              styles.messageContainer,
-              msg.isBot ? styles.botMessage : styles.userMessage
-            ]}
-          >
-            <Text style={styles.messageText}>{msg.text}</Text>
-          </View>
-        ))}
-      </ScrollView>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Type your message..."
-          placeholderTextColor="#999"
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+      <View style={styles.chatContainer}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {chatHistory.map((msg) => (
+            <View
+              key={msg.id}
+              style={[
+                styles.messageContainer,
+                msg.isBot ? styles.botMessage : styles.userMessage
+              ]}
+            >
+              <Text style={styles.messageText}>{msg.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
       </View>
-    </KeyboardAvoidingView>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        style={styles.inputContainer}
+      >
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            value={message}
+            onChangeText={setMessage}
+            placeholder="Type your message..."
+            placeholderTextColor="#999"
+            multiline
+          />
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleSend}
+            disabled={message.trim() === ''}
+          >
+            <Text style={[
+              styles.sendButtonText,
+              message.trim() === '' && styles.sendButtonTextDisabled
+            ]}>Send</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -75,10 +142,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   chatContainer: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
     padding: 10,
+    paddingBottom: 20,
   },
   messageContainer: {
     maxWidth: '80%',
@@ -99,11 +173,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
   },
   input: {
     flex: 1,
@@ -113,16 +191,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginRight: 10,
     fontSize: 16,
+    maxHeight: 100,
   },
   sendButton: {
     backgroundColor: '#4CAF50',
     borderRadius: 20,
     paddingHorizontal: 20,
+    paddingVertical: 10,
     justifyContent: 'center',
   },
   sendButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
+  },
+  sendButtonTextDisabled: {
+    opacity: 0.5,
   },
 });
 

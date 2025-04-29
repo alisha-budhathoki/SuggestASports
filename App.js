@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Platform } from 'react-native';
+import { Platform, ActivityIndicator, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { checkAuthStatus } from './services/api';
 
 import SplashScreen from './screens/SplashScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -13,6 +14,8 @@ import QuizQuestions from './screens/QuizQuestions';
 import QuizResults from './screens/QuizResults';
 import ChatBotScreen from './screens/ChatBotScreen';
 import AddActivityScreen from './screens/AddActivityScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -34,6 +37,9 @@ const MainTabs = () => {
               break;
             case 'Chat':
               iconName = 'chat';
+              break;
+            case 'Profile':
+              iconName = 'person';
               break;
             default:
               iconName = 'circle';
@@ -73,38 +79,52 @@ const MainTabs = () => {
       />
       <Tab.Screen name="Quiz" component={QuizScreen} />
       <Tab.Screen name="Chat" component={ChatBotScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };
 
 // Main Stack Navigator
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
+
+  const checkAuthentication = async () => {
+    try {
+      const { isAuthenticated } = await checkAuthStatus();
+      setIsAuthenticated(isAuthenticated);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Splash"
+        initialRouteName={isAuthenticated ? 'Main' : 'Login'}
         screenOptions={{
           headerShown: false,
         }}
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{
-            headerShown: true,
-            headerTitle: 'Profile',
-            headerStyle: {
-              backgroundColor: '#4CAF50',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-            headerBackTitle: 'Back',
-          }}
-        />
         <Stack.Screen
           name="QuizQuestions"
           component={QuizQuestions}

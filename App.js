@@ -16,6 +16,7 @@ import ChatBotScreen from './screens/ChatBotScreen';
 import AddActivityScreen from './screens/AddActivityScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import SportDetailsScreen from './screens/SportDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -171,6 +172,13 @@ export default function App() {
               fontWeight: 'bold',
             },
             headerBackTitle: 'Back',
+          }}
+        />
+        <Stack.Screen
+          name="SportDetails"
+          component={SportDetailsScreen}
+          options={{
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

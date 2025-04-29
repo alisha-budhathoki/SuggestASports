@@ -86,15 +86,12 @@ const LoginScreen = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={() => navigation.navigate('Register')}
-            disabled={loading}
-          >
-            <Text style={styles.registerButtonText}>
-              Don't have an account? Register
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.registerLink}>Register</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -157,13 +154,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  registerButton: {
+  registerContainer: {
     marginTop: 20,
     alignItems: 'center',
   },
-  registerButtonText: {
+  registerText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  registerLink: {
     color: '#4CAF50',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   disabledButton: {
     opacity: 0.7,

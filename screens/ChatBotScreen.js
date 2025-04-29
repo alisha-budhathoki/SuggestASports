@@ -17,7 +17,7 @@ const ChatBotScreen = () => {
   const [chatHistory, setChatHistory] = useState([
     {
       id: 1,
-      text: 'Hello! I\'m your sports assistant. How can I help you today?',
+      text: 'Hello! I\'m your sports assistan. How can I help you today?',
       isBot: true,
     },
   ]);

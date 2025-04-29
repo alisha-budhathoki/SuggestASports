@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Replace 192.168.1.X with your computer's local IP address
-const API_URL = "http://192.168.42.14:3000/api/v1";
+const API_URL = "https://gemini47.onrender.com/api/v1";
 
 export const login = async (email, password) => {
   try {

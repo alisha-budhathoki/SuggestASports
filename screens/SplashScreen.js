@@ -11,16 +11,16 @@ const SplashScreen = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../assets/splash-icon.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <Text style={styles.title}>SuggestaSport</Text>
-      <Text style={styles.subtitle}>Find Your Perfect Sport</Text>
-    </View>
-  );
+		<View style={styles.container}>
+			<Image
+				source={require("../assets/splash-icon.png")}
+				style={styles.logo}
+				resizeMode="contain"
+			/>
+			<Text style={styles.title}>Sportsphedia</Text>
+			<Text style={styles.subtitle}>Find Your Perfect Sport</Text>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({

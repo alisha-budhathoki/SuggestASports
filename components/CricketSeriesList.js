@@ -67,7 +67,7 @@ const CricketSeriesList = ({ seriesData }) => {
     }
   };
 
-  if (sortedMatches.length === 0) {
+  if (sortedMatches?.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Icon name="sports-cricket" size={40} color="#ccc" />
@@ -77,58 +77,74 @@ const CricketSeriesList = ({ seriesData }) => {
   }
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
-    >
-      {sortedMatches.map((match) => (
-        <TouchableOpacity key={match.matchInfo.matchId} style={styles.matchCard}>
-          <View style={styles.matchHeader}>
-            <View style={styles.statusContainer}>
-              <View style={[styles.statusDot, { backgroundColor: getMatchStatusColor(match.matchInfo.stateTitle) }]} />
-              <Text style={[styles.matchStatus, { color: getMatchStatusColor(match.matchInfo.stateTitle) }]}>
-                {match.matchInfo.stateTitle || 'Upcoming'}
-              </Text>
-            </View>
-            <Text style={styles.matchDate}>{formatDate(match.matchInfo.startDate)}</Text>
-          </View>
+		<ScrollView
+			horizontal
+			showsHorizontalScrollIndicator={false}
+			contentContainerStyle={styles.scrollContent}>
+			{sortedMatches?.length&& sortedMatches?.map((match) => (
+				<TouchableOpacity
+					key={match.matchInfo.matchId}
+					style={styles.matchCard}>
+					<View style={styles.matchHeader}>
+						<View style={styles.statusContainer}>
+							<View
+								style={[
+									styles.statusDot,
+									{
+										backgroundColor: getMatchStatusColor(
+											match.matchInfo.stateTitle
+										),
+									},
+								]}
+							/>
+							<Text
+								style={[
+									styles.matchStatus,
+									{ color: getMatchStatusColor(match.matchInfo.stateTitle) },
+								]}>
+								{match.matchInfo.stateTitle || "Upcoming"}
+							</Text>
+						</View>
+						<Text style={styles.matchDate}>
+							{formatDate(match.matchInfo.startDate)}
+						</Text>
+					</View>
 
-          <View style={styles.teamsContainer}>
-            <View style={styles.team}>
-              <Text style={styles.teamName} numberOfLines={2}>
-                {match.matchInfo.team1?.teamName || 'TBD'}
-              </Text>
-              <Text style={styles.teamScore}>
-                {getTeamScore(match, 1)}
-              </Text>
-            </View>
+					<View style={styles.teamsContainer}>
+						<View style={styles.team}>
+							<Text style={styles.teamName} numberOfLines={2}>
+								{match.matchInfo.team1?.teamName || "TBD"}
+							</Text>
+							<Text style={styles.teamScore}>{getTeamScore(match, 1)}</Text>
+						</View>
 
-            <View style={styles.vsContainer}>
-              <Text style={styles.vsText}>VS</Text>
-            </View>
+						<View style={styles.vsContainer}>
+							<Text style={styles.vsText}>VS</Text>
+						</View>
 
-            <View style={styles.team}>
-              <Text style={styles.teamName} numberOfLines={2}>
-                {match.matchInfo.team2?.teamName || 'TBD'}
-              </Text>
-              <Text style={styles.teamScore}>
-                {getTeamScore(match, 2)}
-              </Text>
-            </View>
-          </View>
+						<View style={styles.team}>
+							<Text style={styles.teamName} numberOfLines={2}>
+								{match.matchInfo.team2?.teamName || "TBD"}
+							</Text>
+							<Text style={styles.teamScore}>{getTeamScore(match, 2)}</Text>
+						</View>
+					</View>
 
-          <View style={styles.matchFooter}>
-            <View style={styles.matchInfo}>
-              <Icon name="sports-cricket" size={16} color="#666" />
-              <Text style={styles.matchFormat}>{match.matchInfo.matchFormat || 'TBD'}</Text>
-            </View>
-            <Text style={styles.matchDesc}>{match.matchInfo.matchDesc || 'Match'}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
+					<View style={styles.matchFooter}>
+						<View style={styles.matchInfo}>
+							<Icon name="sports-cricket" size={16} color="#666" />
+							<Text style={styles.matchFormat}>
+								{match.matchInfo.matchFormat || "TBD"}
+							</Text>
+						</View>
+						<Text style={styles.matchDesc}>
+							{match.matchInfo.matchDesc || "Match"}
+						</Text>
+					</View>
+				</TouchableOpacity>
+			))}
+		</ScrollView>
+	);
 };
 
 const styles = StyleSheet.create({

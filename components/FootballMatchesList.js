@@ -40,7 +40,7 @@ const FootballMatchesList = ({ matches }) => {
     }
   };
 
-  if (matches.length === 0) {
+  if (matches?.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Icon name="sports-soccer" size={40} color="#ccc" />
@@ -55,7 +55,7 @@ const FootballMatchesList = ({ matches }) => {
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
     >
-      {matches.map((match) => (
+      {matches?.length&&matches?.map((match) => (
         <TouchableOpacity key={match.id} style={styles.matchCard}>
           <View style={styles.matchHeader}>
             <View style={styles.statusContainer}>

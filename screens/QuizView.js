@@ -30,7 +30,7 @@ const QuizView = () => {
     }
 
     const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < questions.length) {
+    if (nextQuestion < questions?.length) {
       setCurrentQuestion(nextQuestion);
     } else {
       setShowScore(true);
@@ -48,7 +48,7 @@ const QuizView = () => {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreText}>Your Score: {score}/{questions.length}</Text>
+          <Text style={styles.scoreText}>Your Score: {score}/{questions?.length}</Text>
           <TouchableOpacity style={styles.button} onPress={restartQuiz}>
             <Text style={styles.buttonText}>Restart Quiz</Text>
           </TouchableOpacity>

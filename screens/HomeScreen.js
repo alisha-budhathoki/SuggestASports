@@ -258,7 +258,7 @@ const HomeScreen = ({ navigation }) => {
 						<TouchableOpacity
 							onPress={navigateToAddActivity}></TouchableOpacity>
 					</View>
-					{activities.length > 0 ? (
+					{activities?.length > 0 ? (
 						activities.slice(0, 3).map((activity) => (
 							<View key={activity.id} style={styles.activityCard}>
 								<View

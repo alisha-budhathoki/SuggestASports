@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Replace 192.168.1.X with your computer's local IP address
-const API_URL = "https://gemini47.onrender.com/api/v1";
+const API_URL = "http://192.168.18.28:3000/api/v1";
 
 export const login = async (email, password) => {
   try {
@@ -121,5 +121,77 @@ export const logout = async () => {
     await AsyncStorage.removeItem('userData');
   } catch (error) {
     console.error('Logout error:', error);
+  }
+};
+
+export const sendChatMessage = async (message) => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    console.log('Sending chat message to:', `${API_URL}/chats`);
+    const requestBody = { message };
+    console.log('Request payload:', requestBody);
+    console.log('Using token:', token.substring(0, 10) + '...');
+
+    // Add timeout to the fetch request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch(`${API_URL}/chats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    console.log('Response status:', response.status);
+    console.log('Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+
+    // Check if the response is JSON
+    const contentType = response.headers.get('content-type');
+    console.log('Response content type:', contentType);
+
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Invalid content type received:', contentType);
+      throw new Error('Server returned non-JSON response');
+    }
+
+    const data = await response.json();
+    console.log('Response data:', data);
+
+    if (!response.ok) {
+      console.error('Server error response:', data);
+      throw new Error(data.message || 'Failed to send message');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Chat error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      type: error.constructor.name
+    });
+
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please check your internet connection.');
+    }
+
+    if (error.message === 'Network request failed') {
+      throw new Error('Unable to connect to the server. Please check your internet connection and try again.');
+    }
+
+    if (error.message === 'Server returned non-JSON response') {
+      throw new Error('Server error. Please try again later.');
+    }
+    throw error;
   }
 };

@@ -1,84 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
+  StyleSheet,
+  FlatList,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { sendChatMessage } from '../services/api';
 
-const ChatBotScreen = () => {
-  const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState([
-    {
-      id: 1,
-      text: 'Hello! I\'m your sports assistan. How can I help you today?',
-      isBot: true,
-    },
-  ]);
+const INITIAL_MESSAGE = {
+  id: 'welcome',
+  text: "👋 Hi! I'm your sports assistant. I can help you:\n\n• Find the perfect sport for you\n• Learn about different sports\n• Get sports recommendations\n• Answer sports-related questions\n\nWhat would you like to know?",
+  sender: 'bot',
+};
 
-  const sendMessage = () => {
-    if (message.trim() === '') return;
+const ChatbotScreen = () => {
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const flatListRef = useRef(null);
 
-    const newMessage = {
-      id: chatHistory.length + 1,
-      text: message,
-      isBot: false,
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      text: inputText,
+      sender: 'user',
     };
 
-    setChatHistory([...chatHistory, newMessage]);
-    setMessage('');
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInputText('');
+    setLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: chatHistory.length + 2,
-        text: 'I understand you\'re interested in sports. Could you tell me more about what you\'re looking for?',
-        isBot: true,
+    try {
+      const response = await sendChatMessage(inputText);
+      const botMessage = {
+        id: (Date.now() + 1).toString(),
+        text: response.message,
+        sender: 'bot',
       };
-      setChatHistory(prev => [...prev, botResponse]);
-    }, 1000);
+      setMessages(prevMessages => [...prevMessages, botMessage]);
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to get response from chatbot');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const renderMessage = ({ item }) => (
+    <View style={[
+      styles.messageContainer,
+      item.sender === 'user' ? styles.userMessage : styles.botMessage
+    ]}>
+      {item.sender === 'bot' && (
+        <View style={styles.botAvatar}>
+          <Icon name="sports" size={20} color="#fff" />
+        </View>
+      )}
+      <View style={styles.messageContent}>
+        <Text style={[
+          styles.messageText,
+          item.sender === 'user' ? styles.userMessageText : styles.botMessageText
+        ]}>{item.text}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Sports Assistant</Text>
       </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoid}
+        style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <ScrollView style={styles.chatContainer}>
-          {chatHistory.map((msg) => (
-            <View
-              key={msg.id}
-              style={[
-                styles.messageContainer,
-                msg.isBot ? styles.botMessage : styles.userMessage,
-              ]}
-            >
-              <Text style={styles.messageText}>{msg.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+        />
 
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            value={message}
-            onChangeText={setMessage}
+            value={inputText}
+            onChangeText={setInputText}
             placeholder="Type your message..."
             placeholderTextColor="#999"
+            multiline
+            maxLength={500}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-            <Icon name="send" size={24} color="#fff" />
+          <TouchableOpacity
+            style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledButton]}
+            onPress={handleSend}
+            disabled={!inputText.trim() || loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Icon name="send" size={24} color="#fff" />
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -94,68 +137,101 @@ const styles = StyleSheet.create({
   header: {
     padding: 15,
     backgroundColor: '#fff',
-    elevation: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    textAlign: 'center',
   },
-  keyboardAvoid: {
+  keyboardView: {
     flex: 1,
   },
-  chatContainer: {
-    flex: 1,
-    padding: 15,
+  messagesList: {
+    padding: 16,
   },
   messageContainer: {
-    maxWidth: '80%',
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 10,
+    flexDirection: 'row',
+    marginBottom: 12,
+    maxWidth: '85%',
   },
-  botMessage: {
-    backgroundColor: '#E3F2FD',
-    alignSelf: 'flex-start',
-    borderBottomLeftRadius: 5,
+  botAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  messageContent: {
+    flex: 1,
   },
   userMessage: {
-    backgroundColor: '#4CAF50',
     alignSelf: 'flex-end',
-    borderBottomRightRadius: 5,
+  },
+  botMessage: {
+    alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
+    padding: 12,
+    borderRadius: 16,
+  },
+  userMessageText: {
+    color: '#fff',
+    backgroundColor: '#4CAF50',
+    borderTopRightRadius: 4,
+  },
+  botMessageText: {
     color: '#333',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 16,
     backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopColor: '#eee',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
     backgroundColor: '#f5f5f5',
     borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginRight: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    maxHeight: 100,
     fontSize: 16,
   },
   sendButton: {
-    backgroundColor: '#4CAF50',
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 
-export default ChatBotScreen;
+export default ChatbotScreen;

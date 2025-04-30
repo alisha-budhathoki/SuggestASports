@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Replace 192.168.1.X with your computer's local IP address
 const API_URL = "https://gemini47.onrender.com/api/v1";
 
 export const login = async (email, password) => {
@@ -155,7 +154,6 @@ export const sendChatMessage = async (message) => {
     console.log('Response status:', response.status);
     console.log('Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
 
-    // Check if the response is JSON
     const contentType = response.headers.get('content-type');
     console.log('Response content type:', contentType);
 

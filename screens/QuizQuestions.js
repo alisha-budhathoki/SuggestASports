@@ -94,7 +94,6 @@ const QuizQuestions = ({ navigation }) => {
       setScore(score + 1);
     }
 
-    // Show fun fact
     setShowFunFact(true);
 
     // Move to next question after delay

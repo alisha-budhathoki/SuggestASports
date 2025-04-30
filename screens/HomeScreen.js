@@ -73,7 +73,6 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  // Use useFocusEffect to reload activities when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadActivities();
@@ -113,11 +112,9 @@ const HomeScreen = ({ navigation }) => {
       setLoading(true);
       setError(null);
 
-      // Load cricket data
       const cricketMatches = await fetchCricketMatches();
       setCricketData(cricketMatches);
 
-      // Load football data
       const footballMatches = await fetchFootballMatches();
       setFootballData(footballMatches);
 
